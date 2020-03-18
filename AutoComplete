@@ -1,0 +1,140 @@
+//This is my initial program
+#include <iostream>
+#include <fstream>
+using namespace std;
+const int MAX_SIZE = 4000000;
+const string FILE_NAME = "Googlewords.txt";
+string a[MAX_SIZE];
+void insertionSort(string a[], int size);
+int binarySearch(string a[], string key, int size);
+int readDictionary(string a[], string fileName);
+void writeDictionary(string a[], int size, string fileName);
+int updateDictionary(string a[], int size, string s, string fileName);
+void outputMatches(string a[], int size, string s);
+int main(){
+   int size = readDictionary(a, FILE_NAME);
+   string input;
+   cout << "Type one word. \"q\" to quit." << endl;
+   cout << "> ";
+   cin >> input;
+   while(input != "q"){
+       outputMatches(a, size, input);
+       size = updateDictionary(a, size, input, FILE_NAME);
+       cout << "> ";
+       cin >> input;
+   }
+return 0;
+}
+///TODO(0) define binarySearch
+/// inner binary function (recursive)
+int binary_search(string arr[], int left, int right, string key){
+   if (right >= left) {
+       int mid = left + (right - left) / 2;
+       //check mid element
+       if (arr[mid] == key)
+           return mid;
+
+       // If element is smaller than mid, then search in left subarray
+       if (arr[mid] > key)
+           return binary_search(arr, left, mid - 1, key);
+
+       // Else serch in right subarray
+       return binary_search(arr, mid + 1, right, key);
+   }
+   //if absent
+return -1;
+}
+//function to call binary_search
+int binarySearch(string a[],string key,int size){
+   return (binary_search(a,0,size,key));
+}
+///TODO(1) define insertionSort
+///insertion sort : sort array 'a' of size 'size'
+void insertionSort(string a[], int size){
+   int i, j;
+   string key;
+   //iterate from 2nd element
+   for (i = 1; i < size; i++) {
+       key = a[i];
+       j = i - 1;
+       ///moving all elements of a[0 to i-1] which are greater than key to one position ahead (j+1)
+       while (j >= 0 && a[j] > key) {
+           a[j + 1] = a[j];
+           j = j - 1;
+       }
+       /// set key
+       a[j + 1] = key;
+   }
+}
+///TODO(2) define readDictionary
+/*
+- Open an ifstream using fileName
+- Read one word at a time, separated by \n, into a
+- return the number of words read. This will be used for size throughout the rest of the code.
+*/
+int readDictionary(string a[],string filename){
+   ifstream myfile; ///open inputFile for read
+   myfile.open(filename.c_str()); /// c_str() converts string to const char*
+   int linecount=0; /// no of lines read to 0
+   if (myfile.is_open()){ ///check whether file is opened for read && write successfully or not
+       string str;
+       while (getline(myfile, str)){
+           a[linecount++]=str;
+       } ///while
+   }///if ends
+return linecount;///size
+}
+
+///TODO(3) define writeDictionary
+/*
+- Open an ofstream using fileName
+- Use its default behavior of deleting the existing file, we will write a new one.
+- Write each element of a to the file.
+*/
+void writeDictionary(string a[], int size, string fileName){
+//open file to write
+   ofstream outfile(fileName.c_str());
+   int index=0;
+   //write all elements
+   while(index!=size){
+       outfile<<a[index]<<"\n";
+       index++;
+   }
+}
+
+///TODO(4) define updateDictionary
+/*
+- Use binarySearch to search a for s.
+- If s is NOT found at a valid index:
+- assign s to the end of the array.
+- The index of the end of the array is size. eg if size is 5, the new element should be written to index 5.
+- increment size
+- Sort a using insertionSort
+- Write a to the file using writeDictionary
+*/
+///only update dictionary if element 's' is not present in array 'a'
+int updateDictionary(string a[], int size, string s, string fileName){
+   int index=binarySearch(a,s,size);
+   ///if s is not present
+   if(index==-1){
+       a[size]=s; /// add to last
+       size++;///increment size
+       insertionSort(a,size);
+       writeDictionary(a,size,fileName);
+   }
+   return size;
+}
+///TODO(5) define outputMatches
+/*
+- loop through each element of a
+- call .find on each element, searching for s
+- If the element begins with s, ie the index returned from .find is 0, then print the element
+*/
+void outputMatches(string a[], int size, string s){
+///loop
+   for(int i=0;i<size;i++){
+       ///find returns 0 only if s is at first position
+       if(a[i].find(s) == 0)
+       cout<<a[i]<<"\n";
+   }
+}
